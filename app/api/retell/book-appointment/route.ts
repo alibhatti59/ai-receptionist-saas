@@ -79,12 +79,10 @@ export async function POST(request: NextRequest) {
         })
 
         // Save to Supabase so it shows on the dashboard
-        await supabase.from('appointments').insert({
+        await supabase.from('activity_log').insert({
             business_id: business.id,
-            caller_name,
-            caller_phone: body.call?.from_number || 'unknown',
-            appointment_time: startDateTime.toISOString(),
-            status: 'confirmed',
+            event_type: 'booking_created',
+            description: `New appointment booked for ${caller_name}`,
         })
 
         return NextResponse.json({

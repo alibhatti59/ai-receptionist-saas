@@ -1,7 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase'
 import BackgroundGlow from '../components/BackgroundGlow'
 
@@ -21,130 +22,159 @@ type DaySchedule = {
     end: string
 }
 
-export default function OnboardingPage() {
+export default function SettingsPage() {
+    const [businessId, setBusinessId] = useState<string | null>(null)
     const [businessName, setBusinessName] = useState('')
     const [schedule, setSchedule] = useState<Record<number, DaySchedule>>(() => {
         const initial: Record<number, DaySchedule> = {}
         DAYS.forEach((d) => {
-            initial[d.value] = {
-                enabled: d.value >= 1 && d.value <= 5, // Mon-Fri on by default
-                start: '09:00',
-                end: '17:00',
-            }
+            initial[d.value] = { enabled: false, start: '09:00', end: '17:00' }
         })
         return initial
     })
-    const [error, setError] = useState('')
-    const [loading, setLoading] = useState(false)
+    const [loading, setLoading] = useState(true)
+    const [saving, setSaving] = useState(false)
     const router = useRouter()
 
+    useEffect(() => {
+        const load = async () => {
+            const supabase = createClient()
+            const { data: { user } } = await supabase.auth.getUser()
+            if (!user) {
+                router.push('/login')
+                return
+            }
+
+            const { data: business } = await supabase
+                .from('businesses')
+                .select('*')
+                .eq('owner_id', user.id)
+                .single()
+
+            if (!business) {
+                router.push('/onboarding')
+                return
+            }
+
+            setBusinessId(business.id)
+            setBusinessName(business.business_name)
+
+            const { data: slots } = await supabase
+                .from('availability_slots')
+                .select('*')
+                .eq('business_id', business.id)
+
+            if (slots && slots.length > 0) {
+                setSchedule((prev) => {
+                    const updated = { ...prev }
+                    slots.forEach((s) => {
+                        updated[s.day_of_week] = {
+                            enabled: true,
+                            start: s.start_time.slice(0, 5),
+                            end: s.end_time.slice(0, 5),
+                        }
+                    })
+                    return updated
+                })
+            }
+
+            setLoading(false)
+        }
+
+        load()
+    }, [router])
+
     const toggleDay = (day: number) => {
-        setSchedule((prev) => ({
-            ...prev,
-            [day]: { ...prev[day], enabled: !prev[day].enabled },
-        }))
+        setSchedule((prev) => ({ ...prev, [day]: { ...prev[day], enabled: !prev[day].enabled } }))
     }
 
     const updateTime = (day: number, field: 'start' | 'end', value: string) => {
-        setSchedule((prev) => ({
-            ...prev,
-            [day]: { ...prev[day], [field]: value },
-        }))
+        setSchedule((prev) => ({ ...prev, [day]: { ...prev[day], [field]: value } }))
     }
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault()
-        setLoading(true)
-        setError('')
+    const handleSave = async () => {
+        if (!businessId) return
+        setSaving(true)
 
         const supabase = createClient()
-        const { data: { user } } = await supabase.auth.getUser()
-
-        if (!user) {
-            setError('You must be logged in.')
-            setLoading(false)
-            return
-        }
-
         const enabledDays = DAYS.filter((d) => schedule[d.value].enabled)
-        if (enabledDays.length === 0) {
-            setError('Select at least one working day.')
-            setLoading(false)
-            return
-        }
 
-        // Build a readable summary string for business_hours (kept for display/prompt use)
         const hoursummary = enabledDays
             .map((d) => `${d.label.slice(0, 3)} ${schedule[d.value].start}-${schedule[d.value].end}`)
             .join(', ')
 
-        const { data: newBusiness, error: businessError } = await supabase
+        await supabase
             .from('businesses')
-            .insert({
-                owner_id: user.id,
-                business_name: businessName,
-                business_hours: hoursummary,
-            })
-            .select()
-            .single()
+            .update({ business_name: businessName, business_hours: hoursummary })
+            .eq('id', businessId)
 
-        if (businessError) {
-            setError(businessError.message)
-            setLoading(false)
-            return
+        // Replace availability: delete old, insert new
+        await supabase.from('availability_slots').delete().eq('business_id', businessId)
+
+        if (enabledDays.length > 0) {
+            const slotRows = enabledDays.map((d) => ({
+                business_id: businessId,
+                day_of_week: d.value,
+                start_time: schedule[d.value].start,
+                end_time: schedule[d.value].end,
+                slot_duration_minutes: 30,
+            }))
+            await supabase.from('availability_slots').insert(slotRows)
         }
 
-        const slotRows = enabledDays.map((d) => ({
-            business_id: newBusiness.id,
-            day_of_week: d.value,
-            start_time: schedule[d.value].start,
-            end_time: schedule[d.value].end,
-            slot_duration_minutes: 30,
-        }))
+        await supabase.from('activity_log').insert({
+            business_id: businessId,
+            event_type: 'settings_updated',
+            description: 'Business settings and availability updated',
+        })
 
-        const { error: slotsError } = await supabase.from('availability_slots').insert(slotRows)
+        setSaving(false)
+        toast.success('Settings saved')
+    }
 
-        setLoading(false)
-
-        if (slotsError) {
-            setError(slotsError.message)
-            return
-        }
-
-        router.push('/dashboard')
+    if (loading) {
+        return (
+            <div className="min-h-screen text-slate-100 flex items-center justify-center">
+                <BackgroundGlow />
+                <div className="animate-spin h-8 w-8 border-2 border-indigo-500 border-t-transparent rounded-full" />
+            </div>
+        )
     }
 
     return (
-        <div className="min-h-screen text-slate-100 flex items-center justify-center px-4 py-12">
+        <div className="min-h-screen text-slate-100">
             <BackgroundGlow />
 
-            <div className="w-full max-w-lg">
-                <div className="text-center mb-8">
-                    <div className="h-10 w-10 rounded-lg bg-indigo-500 flex items-center justify-center font-bold mx-auto mb-4">
-                        AI
+            <header className="border-b border-slate-800/60 bg-slate-950/60 backdrop-blur sticky top-0 z-10">
+                <div className="max-w-3xl mx-auto px-6 py-4 flex justify-between items-center">
+                    <div className="flex items-center gap-2">
+                        <div className="h-8 w-8 rounded-lg bg-indigo-500 flex items-center justify-center font-bold text-sm">
+                            AI
+                        </div>
+                        <span className="font-semibold">FrontDesk</span>
                     </div>
-                    <h1 className="text-2xl font-bold">Set up your business</h1>
-                    <p className="text-slate-400 text-sm mt-1">
-                        This tells your AI receptionist when to take bookings.
-                    </p>
+                    <a href="/dashboard" className="text-sm text-slate-400 hover:text-white transition">
+                        ← Back to Dashboard
+                    </a>
                 </div>
+            </header>
 
-                <form onSubmit={handleSubmit} className="space-y-6">
+            <main className="max-w-3xl mx-auto px-6 py-10">
+                <h1 className="text-2xl font-bold mb-8">Settings</h1>
+
+                <div className="space-y-6">
                     <div className="bg-slate-900/70 backdrop-blur border border-slate-800 rounded-xl p-5">
                         <label className="block text-sm text-slate-400 mb-1.5">Business Name</label>
                         <input
                             type="text"
                             value={businessName}
                             onChange={(e) => setBusinessName(e.target.value)}
-                            required
-                            placeholder="e.g. Bright Smile Dental"
                             className="w-full px-3.5 py-2.5 bg-slate-950/60 border border-slate-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
                         />
                     </div>
 
                     <div className="bg-slate-900/70 backdrop-blur border border-slate-800 rounded-xl p-5">
                         <p className="text-sm text-slate-400 mb-4">Working days & hours</p>
-
                         <div className="space-y-2">
                             {DAYS.map((day) => {
                                 const daySchedule = schedule[day.value]
@@ -165,9 +195,7 @@ export default function OnboardingPage() {
                                                     }`}
                                             />
                                         </button>
-
                                         <span className="text-sm w-24 shrink-0">{day.label}</span>
-
                                         <input
                                             type="time"
                                             value={daySchedule.start}
@@ -189,17 +217,15 @@ export default function OnboardingPage() {
                         </div>
                     </div>
 
-                    {error && <p className="text-red-400 text-sm">{error}</p>}
-
                     <button
-                        type="submit"
-                        disabled={loading}
+                        onClick={handleSave}
+                        disabled={saving}
                         className="w-full bg-indigo-500 hover:bg-indigo-400 transition text-white font-medium py-2.5 rounded-lg disabled:opacity-50"
                     >
-                        {loading ? 'Saving...' : 'Continue to Dashboard'}
+                        {saving ? 'Saving...' : 'Save Changes'}
                     </button>
-                </form>
-            </div>
+                </div>
+            </main>
         </div>
     )
 }

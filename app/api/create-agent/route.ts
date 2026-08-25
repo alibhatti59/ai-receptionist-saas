@@ -123,6 +123,7 @@ If the caller goes silent: pause, ask once if they're still there, then end the 
                 responsiveness: 0.9,
                 interruption_sensitivity: 0.7,
                 enable_backchannel: true, // occasional "mm-hm" acknowledgments, feels more human
+                max_call_duration_ms: 40000,
             }),
         })
 

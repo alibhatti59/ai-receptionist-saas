@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { google } from 'googleapis'
 import { createClient } from '@supabase/supabase-js'
 
 export async function POST(request: NextRequest) {
@@ -23,46 +22,52 @@ export async function POST(request: NextRequest) {
         .eq('retell_agent_id', agentId)
         .single()
 
-    if (!business?.google_refresh_token) {
+    if (!business) {
         return NextResponse.json({ result: { openSlots: [] } })
     }
 
-    try {
-        const oauth2Client = new google.auth.OAuth2(
-            process.env.GOOGLE_CLIENT_ID,
-            process.env.GOOGLE_CLIENT_SECRET
-        )
-        oauth2Client.setCredentials({ refresh_token: business.google_refresh_token })
-        const calendar = google.calendar({ version: 'v3', auth: oauth2Client })
+    const dayOfWeek = new Date(`${date}T00:00:00`).getDay()
 
-        const dayStart = new Date(`${date}T09:00:00`)
-        const dayEnd = new Date(`${date}T17:00:00`)
+    const { data: availability } = await supabase
+        .from('availability_slots')
+        .select('*')
+        .eq('business_id', business.id)
+        .eq('day_of_week', dayOfWeek)
+        .single()
 
-        const freeBusy = await calendar.freebusy.query({
-            requestBody: {
-                timeMin: dayStart.toISOString(),
-                timeMax: dayEnd.toISOString(),
-                items: [{ id: 'primary' }],
-            },
-        })
+    if (!availability) {
+        return NextResponse.json({ result: { openSlots: [] } })
+    }
 
-        const busy = freeBusy.data.calendars?.primary?.busy || []
-        const openSlots: string[] = []
+    // Get already-booked appointments for that date
+    const { data: booked } = await supabase
+        .from('appointments')
+        .select('appointment_time')
+        .eq('business_id', business.id)
+        .gte('appointment_time', `${date}T00:00:00`)
+        .lte('appointment_time', `${date}T23:59:59`)
 
-        for (let h = 9; h < 17; h++) {
-            const slotStart = new Date(`${date}T${String(h).padStart(2, '0')}:00:00`)
-            const slotEnd = new Date(slotStart.getTime() + 30 * 60 * 1000)
-            const conflict = busy.some((b) => {
-                const busyStart = new Date(b.start!)
-                const busyEnd = new Date(b.end!)
-                return slotStart < busyEnd && slotEnd > busyStart
-            })
-            if (!conflict) openSlots.push(`${String(h).padStart(2, '0')}:00`)
+    const bookedTimes = new Set(
+        (booked || []).map((b) => new Date(b.appointment_time).toTimeString().slice(0, 5))
+    )
+
+    const openSlots: string[] = []
+    const [startH, startM] = availability.start_time.split(':').map(Number)
+    const [endH, endM] = availability.end_time.split(':').map(Number)
+    const duration = availability.slot_duration_minutes
+
+    let current = startH * 60 + startM
+    const end = endH * 60 + endM
+
+    while (current < end) {
+        const h = Math.floor(current / 60)
+        const m = current % 60
+        const timeStr = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`
+        if (!bookedTimes.has(timeStr)) {
+            openSlots.push(timeStr)
         }
-
-        return NextResponse.json({ result: { openSlots } })
-    } catch (err) {
-        console.error('Availability check error:', err)
-        return NextResponse.json({ result: { openSlots: [] } })
+        current += duration
     }
+
+    return NextResponse.json({ result: { openSlots } })
 }
