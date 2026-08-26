@@ -51,7 +51,7 @@ export default function LandingPage() {
 
         <p className="fade-in-up-delay-2 text-lg text-slate-400 max-w-2xl mx-auto mb-10">
           An AI receptionist that answers your business phone, understands what callers need,
-          and books real appointments directly on your calendar — 24/7, no hold music, no missed leads.
+          and books real appointments directly on your calendar - 24/7, no hold music, no missed leads.
         </p>
 
         <div className="fade-in-up-delay-2 flex justify-center gap-4 flex-wrap">
@@ -137,7 +137,7 @@ export default function LandingPage() {
         </div>
         <div className="max-w-xl mx-auto bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 mb-12 text-center">
           <p className="text-sm text-amber-300 font-medium mb-1">
-            🧪 This checkout is in test mode — no real charge
+            🧪 This checkout is in test mode - no real charge
           </p>
           <p className="text-xs text-slate-400">
             Use test card <span className="font-mono text-slate-300">4242 4242 4242 4242</span>, any future expiry, any CVC, any ZIP. This demonstrates a full Stripe subscription flow.
