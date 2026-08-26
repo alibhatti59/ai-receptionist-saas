@@ -1,26 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
 import { Resend } from 'resend'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
 export async function POST(request: NextRequest) {
-  const { businessName } = await request.json()
+  const { businessName, email } = await request.json()
 
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  )
-
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user?.email) {
+  if (!email) {
     return NextResponse.json({ skipped: true })
   }
 
   try {
     await resend.emails.send({
-      from: 'AI FrontDesk - Ali Hassnain Bhatti <onboarding@resend.dev>',
-      to: user.email,
+      from: 'Ali Hassnain Bhatti <onboarding@resend.dev>',
+      to: email,
       subject: `Welcome to AI FrontDesk, ${businessName}!`,
       html: `
         <div style="font-family: sans-serif; max-width: 500px; margin: 0 auto;">
@@ -48,6 +41,7 @@ export async function POST(request: NextRequest) {
     })
   } catch (err) {
     console.error('Welcome email error:', err)
+    return NextResponse.json({ sent: false, error: String(err) })
   }
 
   return NextResponse.json({ sent: true })

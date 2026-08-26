@@ -115,7 +115,7 @@ export default function OnboardingPage() {
         await fetch('/api/send-welcome-email', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ businessName }),
+            body: JSON.stringify({ businessName, email: user.email }),
         })
 
         router.push('/dashboard')
