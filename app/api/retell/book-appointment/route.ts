@@ -1,23 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { google } from 'googleapis'
 import { createClient } from '@supabase/supabase-js'
+import { Resend } from 'resend'
+
+const resend = new Resend(process.env.RESEND_API_KEY)
 
 export async function POST(request: NextRequest) {
     const body = await request.json()
-    console.log('RETELL PAYLOAD:', JSON.stringify(body, null, 2))
-
-    // ... rest of the function stays the same for now
-
-    // Retell sends the call context including agent_id, and the args your function schema defined
     const agentId = body.call?.agent_id
-    const args = body.args || body.parameters || {}
-    const { caller_name, date, time } = args
+    const args = body.args || {}
+    const { caller_name, phone, date, time } = args
 
     if (!agentId || !caller_name || !date || !time) {
-        return NextResponse.json(
-            { result: "I'm missing some details to complete the booking." },
-            { status: 200 }
-        )
+        return NextResponse.json({ result: "I'm missing some details to complete the booking." })
     }
 
     const supabase = createClient(
@@ -25,65 +19,60 @@ export async function POST(request: NextRequest) {
         process.env.SUPABASE_SERVICE_ROLE_KEY!
     )
 
-    // Find which business this agent belongs to
     const { data: business } = await supabase
         .from('businesses')
         .select('*')
         .eq('retell_agent_id', agentId)
         .single()
 
-    if (!business || !business.google_refresh_token) {
-        return NextResponse.json(
-            { result: "I'm unable to check the calendar right now. Someone will follow up with you." },
-            { status: 200 }
-        )
+    if (!business) {
+        return NextResponse.json({ result: "I'm unable to process that right now. Someone will follow up with you." })
     }
 
     try {
-        // Set up Google Calendar client using the business's stored refresh token
-        const oauth2Client = new google.auth.OAuth2(
-            process.env.GOOGLE_CLIENT_ID,
-            process.env.GOOGLE_CLIENT_SECRET
-        )
-        oauth2Client.setCredentials({ refresh_token: business.google_refresh_token })
-
-        const calendar = google.calendar({ version: 'v3', auth: oauth2Client })
-
         const startDateTime = new Date(`${date}T${time}:00`)
-        const endDateTime = new Date(startDateTime.getTime() + 30 * 60 * 1000) // 30-minute default slot
 
-        // Check for conflicts first
-        const freeBusy = await calendar.freebusy.query({
-            requestBody: {
-                timeMin: startDateTime.toISOString(),
-                timeMax: endDateTime.toISOString(),
-                items: [{ id: 'primary' }],
-            },
-        })
+        // Double-check the slot's still free (avoid race conditions)
+        const { data: conflict } = await supabase
+            .from('appointments')
+            .select('id')
+            .eq('business_id', business.id)
+            .eq('appointment_time', startDateTime.toISOString())
+            .maybeSingle()
 
-        const busySlots = freeBusy.data.calendars?.primary?.busy || []
-        if (busySlots.length > 0) {
-            return NextResponse.json({
-                result: `That time isn't available. Could we try a different time?`,
-            })
+        if (conflict) {
+            return NextResponse.json({ result: `That time isn't available anymore. Could we try a different time?` })
         }
 
-        // Create the event
-        const event = await calendar.events.insert({
-            calendarId: 'primary',
-            requestBody: {
-                summary: `Appointment with ${caller_name}`,
-                start: { dateTime: startDateTime.toISOString() },
-                end: { dateTime: endDateTime.toISOString() },
-            },
+        await supabase.from('appointments').insert({
+            business_id: business.id,
+            caller_name,
+            caller_phone: phone || body.call?.from_number || 'unknown',
+            appointment_time: startDateTime.toISOString(),
+            status: 'confirmed',
         })
 
-        // Save to Supabase so it shows on the dashboard
         await supabase.from('activity_log').insert({
             business_id: business.id,
             event_type: 'booking_created',
             description: `New appointment booked for ${caller_name}`,
         })
+
+        // Notify the business owner by email
+        const { data: ownerData } = await supabase.auth.admin.getUserById(business.owner_id)
+        const ownerEmail = ownerData?.user?.email
+
+        if (ownerEmail) {
+            await resend.emails.send({
+                from: 'AI FrontDesk <onboarding@resend.dev>',
+                to: ownerEmail,
+                subject: `New appointment booked: ${caller_name}`,
+                html: `<p>A new appointment was booked by your AI receptionist.</p>
+               <p><strong>Name:</strong> ${caller_name}<br/>
+               <strong>Date & Time:</strong> ${date} at ${time}<br/>
+               <strong>Phone:</strong> ${phone || 'not provided'}</p>`,
+            })
+        }
 
         return NextResponse.json({
             result: `You're all set, ${caller_name}. Your appointment is confirmed for ${date} at ${time}.`,
