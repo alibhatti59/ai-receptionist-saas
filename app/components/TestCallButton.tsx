@@ -9,6 +9,7 @@ const CALENDLY_LINK = 'https://calendly.com/thealibhatti-dev/30min' // your real
 export default function TestCallButton({ agentId }: { agentId: string }) {
     const [status, setStatus] = useState<'idle' | 'connecting' | 'active' | 'ended'>('idle')
     const clientRef = useRef<RetellWebClient | null>(null)
+    const timeoutRef = useRef<NodeJS.Timeout | null>(null)
 
     const startCall = async () => {
         setStatus('connecting')
@@ -29,9 +30,23 @@ export default function TestCallButton({ agentId }: { agentId: string }) {
         const client = new RetellWebClient()
         clientRef.current = client
 
-        client.on('call_started', () => setStatus('active'))
-        client.on('call_ended', () => setStatus('ended'))
-        client.on('error', () => setStatus('ended'))
+        client.on('call_started', () => {
+            setStatus('active')
+            // Manually cut the demo at 40 seconds
+            timeoutRef.current = setTimeout(() => {
+                client.stopCall()
+            }, 40000)
+        })
+
+        client.on('call_ended', () => {
+            if (timeoutRef.current) clearTimeout(timeoutRef.current)
+            setStatus('ended')
+        })
+
+        client.on('error', () => {
+            if (timeoutRef.current) clearTimeout(timeoutRef.current)
+            setStatus('ended')
+        })
 
         await client.startCall({ accessToken: data.access_token })
     }
