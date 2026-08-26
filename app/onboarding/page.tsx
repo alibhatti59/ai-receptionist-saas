@@ -111,6 +111,13 @@ export default function OnboardingPage() {
             return
         }
 
+        // Send a welcome/pitch email after successful onboarding
+        await fetch('/api/send-welcome-email', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ businessName }),
+        })
+
         router.push('/dashboard')
     }
 

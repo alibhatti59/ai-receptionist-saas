@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
 
         if (ownerEmail) {
             await resend.emails.send({
-                from: 'AI FrontDesk <onboarding@resend.dev>',
+                from: 'AI FrontDesk - Ali Hassnain Bhatti <onboarding@resend.dev>',
                 to: ownerEmail,
                 subject: `New appointment booked: ${caller_name}`,
                 html: `<p>A new appointment was booked by your AI receptionist.</p>
