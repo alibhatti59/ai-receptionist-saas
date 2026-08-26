@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { Resend } from 'resend'
-
-const resend = new Resend(process.env.RESEND_API_KEY)
+import { transporter } from '@/lib/mailer'
 
 export async function POST(request: NextRequest) {
   const { businessName, email } = await request.json()
@@ -11,8 +9,8 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    await resend.emails.send({
-      from: 'Ali Hassnain Bhatti <onboarding@resend.dev>',
+    const info = await transporter.sendMail({
+      from: `"Ali Hassnain Bhatti" <${process.env.GMAIL_USER}>`,
       to: email,
       subject: `Welcome to AI FrontDesk, ${businessName}!`,
       html: `
@@ -39,10 +37,11 @@ export async function POST(request: NextRequest) {
         </div>
       `,
     })
-  } catch (err) {
-    console.error('Welcome email error:', err)
-    return NextResponse.json({ sent: false, error: String(err) })
-  }
 
-  return NextResponse.json({ sent: true })
+    console.log('Email sent:', info.messageId)
+    return NextResponse.json({ sent: true, id: info.messageId })
+  } catch (err) {
+    console.error('Gmail send error:', err)
+    return NextResponse.json({ sent: false, error: String(err) }, { status: 500 })
+  }
 }

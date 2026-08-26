@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
-import { Resend } from 'resend'
-
-const resend = new Resend(process.env.RESEND_API_KEY)
+import { transporter } from '@/lib/mailer'
 
 export async function POST(request: NextRequest) {
     const body = await request.json()
@@ -63,15 +61,20 @@ export async function POST(request: NextRequest) {
         const ownerEmail = ownerData?.user?.email
 
         if (ownerEmail) {
-            await resend.emails.send({
-                from: 'AI FrontDesk - Ali Hassnain Bhatti <onboarding@resend.dev>',
-                to: ownerEmail,
-                subject: `New appointment booked: ${caller_name}`,
-                html: `<p>A new appointment was booked by your AI receptionist.</p>
-               <p><strong>Name:</strong> ${caller_name}<br/>
-               <strong>Date & Time:</strong> ${date} at ${time}<br/>
-               <strong>Phone:</strong> ${phone || 'not provided'}</p>`,
-            })
+            try {
+                await transporter.sendMail({
+                    from: `"AI FrontDesk" <${process.env.GMAIL_USER}>`,
+                    to: ownerEmail,
+                    subject: `New appointment booked: ${caller_name}`,
+                    html: `<p>A new appointment was booked by your AI receptionist.</p>
+                 <p><strong>Name:</strong> ${caller_name}<br/>
+                 <strong>Date & Time:</strong> ${date} at ${time}<br/>
+                 <strong>Phone:</strong> ${phone || 'not provided'}</p>`,
+                })
+            } catch (emailErr) {
+                // Don't fail the booking if the notification email fails
+                console.error('Booking notification email error:', emailErr)
+            }
         }
 
         return NextResponse.json({
