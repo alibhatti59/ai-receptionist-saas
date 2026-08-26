@@ -32,10 +32,10 @@ export default function TestCallButton({ agentId }: { agentId: string }) {
 
         client.on('call_started', () => {
             setStatus('active')
-            // Manually cut the demo at 40 seconds
+            // Manually cut the demo at 50 seconds
             timeoutRef.current = setTimeout(() => {
                 client.stopCall()
-            }, 40000)
+            }, 50000)
         })
 
         client.on('call_ended', () => {
@@ -77,7 +77,7 @@ export default function TestCallButton({ agentId }: { agentId: string }) {
             {status === 'active' && (
                 <div className="flex items-center gap-3">
                     <span className="text-xs text-emerald-400 flex items-center gap-1">
-                        <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" /> Call in progress (40s demo)
+                        <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" /> Call in progress (50s demo)
                     </span>
                     <button
                         onClick={endCall}
