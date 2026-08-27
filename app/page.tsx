@@ -96,6 +96,34 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* How it works */}
+      <section className="max-w-4xl mx-auto px-6 py-16 border-t border-slate-800/60">
+        <h2 className="text-2xl font-bold text-center mb-10">How it works</h2>
+        <div className="grid sm:grid-cols-3 gap-6">
+          <div className="text-center">
+            <div className="h-10 w-10 rounded-full bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center mx-auto mb-4 text-indigo-400 font-semibold">
+              1
+            </div>
+            <h3 className="font-semibold mb-2">Sign up</h3>
+            <p className="text-sm text-slate-400">Create your account and tell us a bit about your business.</p>
+          </div>
+          <div className="text-center">
+            <div className="h-10 w-10 rounded-full bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center mx-auto mb-4 text-indigo-400 font-semibold">
+              2
+            </div>
+            <h3 className="font-semibold mb-2">Set your availability</h3>
+            <p className="text-sm text-slate-400">Pick your working days and hours - your AI receptionist only books within them.</p>
+          </div>
+          <div className="text-center">
+            <div className="h-10 w-10 rounded-full bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center mx-auto mb-4 text-indigo-400 font-semibold">
+              3
+            </div>
+            <h3 className="font-semibold mb-2">Go live</h3>
+            <p className="text-sm text-slate-400">Your AI receptionist starts answering calls and booking appointments the same day.</p>
+          </div>
+        </div>
+      </section>
+
       {/* Features */}
       <section className="max-w-5xl mx-auto px-6 py-16 border-t border-slate-800/60">
         <div className="grid sm:grid-cols-3 gap-6">
@@ -202,6 +230,29 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* FAQ */}
+      <section className="max-w-3xl mx-auto px-6 py-16 border-t border-slate-800/60">
+        <h2 className="text-2xl font-bold text-center mb-10">Frequently asked questions</h2>
+        <div className="space-y-4">
+          <div className="bg-slate-900/50 backdrop-blur border border-slate-800/60 rounded-xl p-5">
+            <h3 className="font-medium mb-1.5">How long does setup take?</h3>
+            <p className="text-sm text-slate-400">Just a few minutes. Sign up, set your availability, and your AI receptionist is ready to take calls the same day.</p>
+          </div>
+          <div className="bg-slate-900/50 backdrop-blur border border-slate-800/60 rounded-xl p-5">
+            <h3 className="font-medium mb-1.5">Is my data secure?</h3>
+            <p className="text-sm text-slate-400">Your account and appointment data are stored securely with row-level access controls, so only you can see your business's data.</p>
+          </div>
+          <div className="bg-slate-900/50 backdrop-blur border border-slate-800/60 rounded-xl p-5">
+            <h3 className="font-medium mb-1.5">Can I cancel anytime?</h3>
+            <p className="text-sm text-slate-400">Yes. No long-term contracts — the pricing shown is exactly what a real subscription would look like, cancel whenever.</p>
+          </div>
+          <div className="bg-slate-900/50 backdrop-blur border border-slate-800/60 rounded-xl p-5">
+            <h3 className="font-medium mb-1.5">Can this be customized for my specific business?</h3>
+            <p className="text-sm text-slate-400">Yes — this demo shows the core system, but every deployment is customized to how your business actually operates. Reach out and let's talk about your needs.</p>
+          </div>
+        </div>
+      </section>
+
       {/* Final CTA */}
       <section className="max-w-3xl mx-auto px-6 py-16 border-t border-slate-800/60 text-center">
         <h2 className="text-2xl font-bold mb-3">Want something like this for your business?</h2>
@@ -229,16 +280,46 @@ export default function LandingPage() {
       </section>
 
       <footer className="border-t border-slate-800/60 py-8">
-        <p className="text-center text-sm text-slate-500">
-          Built by Ali Hassnain Bhatti ·{' '}
-          <a href="https://www.linkedin.com/in/ali-hassnain-bhatti-1a0506312/" target="_blank" rel="noopener noreferrer" className="hover:text-slate-300">
-            LinkedIn
-          </a>
-          {' '}·{' '}
-          <a href="https://github.com/alibhatti59" target="_blank" rel="noopener noreferrer" className="hover:text-slate-300">
-            GitHub
-          </a>
-        </p>
+        <div className="flex flex-col items-center gap-5">
+          <div className="flex items-center gap-2 flex-wrap justify-center px-6">
+            {['Next.js', 'Retell AI', 'Supabase', 'Stripe'].map((tech) => (
+              <span
+                key={tech}
+                className="text-xs text-slate-500 border border-slate-800 rounded-full px-3 py-1 bg-slate-900/40"
+              >
+                {tech}
+              </span>
+            ))}
+          </div>
+
+          <div className="flex items-center gap-4">
+            <a
+              href="https://www.linkedin.com/in/ali-hassnain-bhatti-1a0506312/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="h-9 w-9 rounded-lg bg-slate-900/70 border border-slate-800 flex items-center justify-center text-slate-400 hover:text-white hover:border-slate-600 transition"
+              aria-label="LinkedIn"
+            >
+              <svg viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4">
+                <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
+              </svg>
+            </a>
+            <a
+              href="https://github.com/alibhatti59"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="h-9 w-9 rounded-lg bg-slate-900/70 border border-slate-800 flex items-center justify-center text-slate-400 hover:text-white hover:border-slate-600 transition"
+              aria-label="GitHub"
+            >
+              <svg viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4">
+                <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.84 1.237 1.84 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.42-1.305.763-1.605-2.665-.305-5.467-1.334-5.467-5.93 0-1.31.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23a11.5 11.5 0 013.003-.404c1.02.005 2.047.138 3.003.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.622-5.479 5.921.43.372.823 1.102.823 2.222 0 1.606-.014 2.898-.014 3.293 0 .322.216.696.825.577C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" />
+              </svg>
+            </a>
+          </div>
+          <p className="text-sm text-slate-500">
+            Built by Ali Hassnain Bhatti
+          </p>
+        </div>
       </footer>
     </div>
   )

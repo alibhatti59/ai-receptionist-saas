@@ -25,14 +25,22 @@ export async function POST(request: NextRequest) {
             <li>✅ Sends you an instant email the moment a booking happens</li>
           </ul>
           <p>Want this running for your real business, fully set up and customized? I build these personally.</p>
-          <p>
-            <a href="https://wa.me/923177336159" style="background:#6366f1;color:white;padding:10px 20px;border-radius:8px;text-decoration:none;margin-right:8px;">
-              Message me on WhatsApp
-            </a>
-            <a href="https://www.linkedin.com/in/ali-hassnain-bhatti-1a0506312/" style="background:#0a66c2;color:white;padding:10px 20px;border-radius:8px;text-decoration:none;">
-              Connect on LinkedIn
-            </a>
-          </p>
+          <table role="presentation" cellpadding="0" cellspacing="0" style="margin: 20px 0;">
+            <tr>
+              <td style="padding-bottom: 10px;">
+                <a href="https://wa.me/923177336159" style="display:inline-block; background:#6366f1; color:white; padding:12px 24px; border-radius:8px; text-decoration:none; font-family:sans-serif; font-size:14px;">
+                  💬 Message me on WhatsApp
+                </a>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <a href="https://www.linkedin.com/in/ali-hassnain-bhatti-1a0506312/" style="display:inline-block; background:#0a66c2; color:white; padding:12px 24px; border-radius:8px; text-decoration:none; font-family:sans-serif; font-size:14px;">
+                  Connect on LinkedIn
+                </a>
+              </td>
+            </tr>
+          </table>
           <p style="color:#888;font-size:12px;margin-top:30px;">— Ali Hassnain Bhatti, AI Automation Engineer</p>
         </div>
       `,
