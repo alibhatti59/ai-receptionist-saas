@@ -32,10 +32,10 @@ export default function TestCallButton({ agentId }: { agentId: string }) {
 
         client.on('call_started', () => {
             setStatus('active')
-            // Manually cut the demo at 70 seconds
+            // Manually cut the demo at 80 seconds
             timeoutRef.current = setTimeout(() => {
                 client.stopCall()
-            }, 70000)
+            }, 80000)
         })
 
         client.on('call_ended', () => {
@@ -77,7 +77,7 @@ export default function TestCallButton({ agentId }: { agentId: string }) {
             {status === 'active' && (
                 <div className="flex items-center gap-3">
                     <span className="text-xs text-emerald-400 flex items-center gap-1">
-                        <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" /> Call in progress (70s demo)
+                        <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" /> Call in progress (80s demo)
                     </span>
                     <button
                         onClick={endCall}
@@ -90,7 +90,7 @@ export default function TestCallButton({ agentId }: { agentId: string }) {
 
             {status === 'ended' && (
                 <div className="bg-indigo-500/10 border border-indigo-500/30 rounded-lg p-4 mt-2">
-                    <p className="text-sm font-medium text-indigo-300 mb-1">That was a 70-second demo</p>
+                    <p className="text-sm font-medium text-indigo-300 mb-1">That was a 80-second demo</p>
                     <p className="text-xs text-slate-400 mb-3">
                         Want the full AI receptionist answering real calls for your business, unlimited?
                     </p>

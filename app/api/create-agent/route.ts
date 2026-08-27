@@ -124,8 +124,8 @@ If the caller goes silent: pause, ask once if they're still there, then end the 
                     llm_id: llmData.llm_id,
                 },
                 voice_id: 'inworld-Nikhil', // a default Retell/ElevenLabs voice, standard tier (cheaper)
-                voice_speed: 1, // slightly slower than default = calmer, less rushed
-                voice_temperature: 0.9, // lower = more consistent tone
+                voice_speed: 1.10, // slightly slower than default = calmer, less rushed
+                voice_temperature: 0.96, // lower = more consistent tone
                 responsiveness: 0.9,
                 interruption_sensitivity: 0.7,
                 enable_backchannel: true, // occasional "mm-hm" acknowledgments, feels more human
