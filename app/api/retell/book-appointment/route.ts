@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
         if (ownerEmail) {
             try {
                 await transporter.sendMail({
-                    from: `"AI FrontDesk" <${process.env.GMAIL_USER}>`,
+                    from: `"AI FrontDesk by Ali" <${process.env.GMAIL_USER}>`,
                     to: ownerEmail,
                     subject: `New appointment booked: ${caller_name}`,
                     html: `<p>A new appointment was booked by your AI receptionist.</p>

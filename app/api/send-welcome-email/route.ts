@@ -10,7 +10,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const info = await transporter.sendMail({
-      from: `"Ali Hassnain Bhatti" <${process.env.GMAIL_USER}>`,
+      from: `"AI FrontDesk by Ali" <${process.env.GMAIL_USER}>`,
       to: email,
       subject: `Welcome to AI FrontDesk, ${businessName}!`,
       html: `
@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
           <p>Hi there, thanks for trying out AI FrontDesk for ${businessName}.</p>
           <p>Here's what your AI receptionist can do once it's live:</p>
           <ul>
-            <li>✅ Answers calls instantly, 24/7 — no missed leads</li>
+            <li>✅ Answers calls instantly, 24/7 - no missed leads</li>
             <li>✅ Books real appointments directly, checked against your actual availability</li>
             <li>✅ Sounds natural and calm, not robotic</li>
             <li>✅ Sends you an instant email the moment a booking happens</li>
