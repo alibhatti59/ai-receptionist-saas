@@ -66,10 +66,40 @@ export async function POST(request: NextRequest) {
                     from: `"AI FrontDesk by Ali" <${process.env.GMAIL_USER}>`,
                     to: ownerEmail,
                     subject: `New appointment booked: ${caller_name}`,
-                    html: `<p>A new appointment was booked by your AI receptionist.</p>
-                 <p><strong>Name:</strong> ${caller_name}<br/>
-                 <strong>Date & Time:</strong> ${date} at ${time}<br/>
-                 <strong>Phone:</strong> ${phone || 'not provided'}</p>`,
+                    html: `
+            <div style="font-family: sans-serif; max-width: 500px; margin: 0 auto;">
+              <h2>📅 New appointment booked!</h2>
+              <p>Your AI receptionist just booked a real appointment, automatically, with no human involved.</p>
+              <p><strong>Name:</strong> ${caller_name}<br/>
+              <strong>Date & Time:</strong> ${date} at ${time}<br/>
+              <strong>Phone:</strong> ${phone || 'not provided'}</p>
+
+              <div style="background:#f5f5ff; border-radius:8px; padding:16px; margin:24px 0;">
+                <p style="margin:0 0 8px 0; font-weight:600;">Like what you're seeing?</p>
+                <p style="margin:0 0 16px 0; font-size:14px; color:#444;">
+                  This is exactly how it would work for your real business, answering every call, checking real availability, and booking appointments while you focus on your work.
+                </p>
+                <table role="presentation" cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td style="padding-bottom: 10px;">
+                      <a href="https://wa.me/923177336159" style="display:inline-block; background:#6366f1; color:white; padding:10px 20px; border-radius:8px; text-decoration:none; font-size:14px;">
+                        💬 Let's talk on WhatsApp
+                      </a>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <a href="https://www.linkedin.com/in/ali-hassnain-bhatti-1a0506312/" style="display:inline-block; background:#0a66c2; color:white; padding:10px 20px; border-radius:8px; text-decoration:none; font-size:14px;">
+                        Connect on LinkedIn
+                      </a>
+                    </td>
+                  </tr>
+                </table>
+              </div>
+
+              <p style="color:#888;font-size:12px;margin-top:20px;">— Ali Hassnain Bhatti, AI Automation Engineer</p>
+            </div>
+          `,
                 })
             } catch (emailErr) {
                 // Don't fail the booking if the notification email fails

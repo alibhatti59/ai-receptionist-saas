@@ -38,6 +38,13 @@ type AvailabilityDay = {
 
 const DAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
+function formatTime12h(time24: string) {
+    const [h, m] = time24.split(':').map(Number)
+    const period = h >= 12 ? 'PM' : 'AM'
+    const hour12 = h % 12 === 0 ? 12 : h % 12
+    return `${hour12}:${String(m).padStart(2, '0')} ${period}`
+}
+
 function groupAppointments(appointments: Appointment[]) {
     const today = new Date()
     today.setHours(0, 0, 0, 0)
@@ -226,9 +233,6 @@ export default function DashboardPage() {
                         </div>
                         <span className="font-semibold">FrontDesk</span>
                     </div>
-                    <a href="/settings" className="text-sm text-slate-400 hover:text-white transition">
-                        Settings
-                    </a>
                     <button onClick={handleLogout} className="text-sm text-slate-400 hover:text-white transition">
                         Log out
                     </button>
@@ -285,16 +289,20 @@ export default function DashboardPage() {
                             return (
                                 <div
                                     key={idx}
-                                    className={`rounded-lg py-2 text-center border ${dayConfig
-                                        ? 'bg-indigo-500/10 border-indigo-500/30 text-indigo-300'
-                                        : 'bg-slate-950/40 border-slate-800 text-slate-600'
+                                    className={`rounded-lg py-3 px-1 text-center border transition ${dayConfig
+                                            ? 'bg-indigo-500/10 border-indigo-500/30 text-indigo-300'
+                                            : 'bg-slate-950/40 border-slate-800 text-slate-600'
                                         }`}
                                 >
-                                    <p className="text-xs font-medium">{label}</p>
+                                    <p className="text-xs font-semibold">{label}</p>
                                     {dayConfig ? (
-                                        <p className="text-[10px] mt-1">{dayConfig.start_time.slice(0, 5)}</p>
+                                        <>
+                                            <p className="text-[10px] mt-1.5 leading-tight">{formatTime12h(dayConfig.start_time.slice(0, 5))}</p>
+                                            <p className="text-[9px] text-indigo-400/60 leading-tight">to</p>
+                                            <p className="text-[10px] leading-tight">{formatTime12h(dayConfig.end_time.slice(0, 5))}</p>
+                                        </>
                                     ) : (
-                                        <p className="text-[10px] mt-1">Off</p>
+                                        <p className="text-[10px] mt-1.5">Closed</p>
                                     )}
                                 </div>
                             )

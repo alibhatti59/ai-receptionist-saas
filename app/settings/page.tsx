@@ -6,6 +6,13 @@ import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase'
 import BackgroundGlow from '../components/BackgroundGlow'
 
+const formatTime12h = (time24: string) => {
+    const [h, m] = time24.split(':').map(Number)
+    const period = h >= 12 ? 'PM' : 'AM'
+    const hour12 = h % 12 === 0 ? 12 : h % 12
+    return `${hour12}:${String(m).padStart(2, '0')} ${period}`
+}
+
 const DAYS = [
     { label: 'Sunday', value: 0 },
     { label: 'Monday', value: 1 },
@@ -100,7 +107,7 @@ export default function SettingsPage() {
         const enabledDays = DAYS.filter((d) => schedule[d.value].enabled)
 
         const hoursummary = enabledDays
-            .map((d) => `${d.label.slice(0, 3)} ${schedule[d.value].start}-${schedule[d.value].end}`)
+            .map((d) => `${d.label.slice(0, 3)} ${formatTime12h(schedule[d.value].start)}-${formatTime12h(schedule[d.value].end)}`)
             .join(', ')
 
         await supabase

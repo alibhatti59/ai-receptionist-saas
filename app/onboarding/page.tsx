@@ -5,6 +5,13 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 import BackgroundGlow from '../components/BackgroundGlow'
 
+const formatTime12h = (time24: string) => {
+    const [h, m] = time24.split(':').map(Number)
+    const period = h >= 12 ? 'PM' : 'AM'
+    const hour12 = h % 12 === 0 ? 12 : h % 12
+    return `${hour12}:${String(m).padStart(2, '0')} ${period}`
+}
+
 const DAYS = [
     { label: 'Sunday', value: 0 },
     { label: 'Monday', value: 1 },
@@ -75,7 +82,7 @@ export default function OnboardingPage() {
 
         // Build a readable summary string for business_hours (kept for display/prompt use)
         const hoursummary = enabledDays
-            .map((d) => `${d.label.slice(0, 3)} ${schedule[d.value].start}-${schedule[d.value].end}`)
+            .map((d) => `${d.label.slice(0, 3)} ${formatTime12h(schedule[d.value].start)}-${formatTime12h(schedule[d.value].end)}`)
             .join(', ')
 
         const { data: newBusiness, error: businessError } = await supabase
@@ -110,13 +117,6 @@ export default function OnboardingPage() {
             setError(slotsError.message)
             return
         }
-
-        // Send a welcome/pitch email after successful onboarding
-        await fetch('/api/send-welcome-email', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ businessName, email: user.email }),
-        })
 
         router.push('/dashboard')
     }
