@@ -246,7 +246,7 @@ export default function DashboardPage() {
                 </div>
 
                 {/* Status cards */}
-                <div className="grid sm:grid-cols-3 gap-4 mb-6">
+                <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                     <div className="bg-slate-900/70 backdrop-blur border border-slate-800 rounded-xl p-5">
                         <p className="text-xs uppercase tracking-wide text-slate-500 mb-2">AI Receptionist</p>
                         {business?.retell_agent_id ? (
@@ -278,6 +278,20 @@ export default function DashboardPage() {
                             )}
                         </p>
                     </div>
+
+                    <div className="bg-slate-900/40 backdrop-blur border border-slate-800/60 rounded-xl p-5 relative overflow-hidden">
+                        <p className="text-xs uppercase tracking-wide text-slate-500 mb-2">Google Calendar Sync</p>
+                        <div className="flex items-center gap-2 mb-3">
+                            <span className="h-2 w-2 rounded-full bg-slate-600" />
+                            <span className="text-sm font-medium text-slate-500">Not connected</span>
+                        </div>
+                        <button
+                            disabled
+                            className="w-full text-xs font-medium px-3 py-1.5 rounded-lg border border-slate-700 text-slate-500 cursor-not-allowed bg-slate-950/40"
+                        >
+                            🔒 Coming Soon
+                        </button>
+                    </div>
                 </div>
 
                 {/* 7-day availability strip */}
@@ -290,8 +304,8 @@ export default function DashboardPage() {
                                 <div
                                     key={idx}
                                     className={`rounded-lg py-3 px-1 text-center border transition ${dayConfig
-                                            ? 'bg-indigo-500/10 border-indigo-500/30 text-indigo-300'
-                                            : 'bg-slate-950/40 border-slate-800 text-slate-600'
+                                        ? 'bg-indigo-500/10 border-indigo-500/30 text-indigo-300'
+                                        : 'bg-slate-950/40 border-slate-800 text-slate-600'
                                         }`}
                                 >
                                     <p className="text-xs font-semibold">{label}</p>
