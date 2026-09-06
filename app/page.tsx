@@ -3,7 +3,7 @@ import BackgroundGlow from './components/BackgroundGlow'
 import LiveBadge from './components/LiveBadge'
 
 const WHATSAPP_LINK = 'https://wa.me/923177336159' // replace with your real number
-const CALENDLY_LINK = 'https://calendly.com/thealibhatti-dev/30min' // replace with your real link
+const CALENDLY_LINK = 'https://calendly.com/ali-hassnain-bhatti/30min' // replace with your real link
 
 export default function LandingPage() {
   return (
